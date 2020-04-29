@@ -13,6 +13,8 @@ struct AddView: View {
     @State private var type = "Personal"
     @State private var amount = ""
     
+    @State private var errorAlertIsShowing = false // this will be used to trigger an alert if user enters non number for amount
+    
     @ObservedObject var expenses: Expenses
 
     static let types = ["Business", "Personal"]
@@ -33,12 +35,18 @@ struct AddView: View {
             }
             .navigationBarTitle("Add new expense")
             .navigationBarItems(trailing: Button("Save") {
-                if let actualAmount = Int(self.amount) {
+                if let actualAmount = Double(self.amount) {
                     let item = ExpenseItem(name: self.name, type: self.type, amount: actualAmount)
                     self.expenses.items.append(item)
                     self.presentationMode.wrappedValue.dismiss()
                 }
+                else {
+                    self.errorAlertIsShowing = true
+                }
             })
+                .alert(isPresented:$errorAlertIsShowing) {
+                    Alert(title: Text("Error"), message: Text("You must enter an actual number for the amount"), dismissButton: .default(Text("OK")))
+            }
         }
     }
 }
